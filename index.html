@@ -22,7 +22,6 @@
     overflow-x: hidden;
   }
 
-  /* ===== Тонкая бумажная текстура ===== */
   body::before {
     content: "";
     position: fixed;
@@ -33,7 +32,6 @@
     z-index: 0;
   }
 
-  /* ===== Виньетка по краям ===== */
   body::after {
     content: "";
     position: fixed;
@@ -43,7 +41,6 @@
     z-index: 1;
   }
 
-  /* ===== Сцена ===== */
   .scene {
     position: relative;
     z-index: 10;
@@ -52,6 +49,15 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    /* запас сверху, чтобы письмо не упиралось в край */
+    padding-top: 320px;
+    margin-top: -300px;
+    transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1),
+                margin-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .scene.opened {
+    padding-top: 20px;
+    margin-top: 0;
   }
 
   .hint {
@@ -78,11 +84,11 @@
     cursor: pointer;
     perspective: 1200px;
     transition: transform 0.5s ease;
+    flex-shrink: 0;
   }
   .envelope-wrap:hover { transform: translateY(-4px); }
   .envelope-wrap.opened { cursor: default; }
 
-  /* Тень под конвертом */
   .envelope-shadow {
     position: absolute;
     bottom: -18px;
@@ -99,7 +105,6 @@
     opacity: 0.6;
   }
 
-  /* Корпус конверта */
   .envelope {
     position: absolute;
     inset: 0;
@@ -111,7 +116,6 @@
     overflow: visible;
   }
 
-  /* Боковые клапаны (нижний треугольник) */
   .env-pocket {
     position: absolute;
     inset: 0;
@@ -138,7 +142,6 @@
       linear-gradient(to bottom left, transparent 49.3%, #e6d3bd 49.3%, #e6d3bd 50.7%, transparent 50.7%) right / 50% 100% no-repeat;
   }
 
-  /* Верхний клапан */
   .env-flap {
     position: absolute;
     top: 0; left: 0;
@@ -156,7 +159,6 @@
     z-index: 1;
   }
 
-  /* Сургучная печать */
   .seal {
     position: absolute;
     top: 96px;
@@ -220,7 +222,6 @@
     z-index: 20;
   }
 
-  /* Двойная рамка письма */
   .letter::before {
     content: "";
     position: absolute;
@@ -240,7 +241,6 @@
 
   .letter-content { position: relative; z-index: 2; }
 
-  /* Цветочный уголок письма */
   .corner-flower {
     position: absolute;
     font-size: 26px;
@@ -297,7 +297,6 @@
     50% { transform: scale(1.25); }
   }
 
-  /* ===== Кнопка «свернуть» ===== */
   .fold-btn {
     margin-top: 28px;
     padding: 10px 26px;
@@ -322,7 +321,6 @@
     color: #fffaf3;
   }
 
-  /* ===== Финальный букет ===== */
   .final-bouquet {
     margin-top: 20px;
     display: flex;
@@ -345,9 +343,19 @@
     50% { transform: rotate(4deg) translateY(-2px); }
   }
 
-  /* ===== Мобильная версия ===== */
+  /* ===== МОБИЛЬНАЯ ВЕРСИЯ ===== */
   @media (max-width: 520px) {
-    body { padding: 16px; align-items: flex-start; padding-top: 40px; }
+    body { padding: 16px; align-items: flex-start; padding-top: 30px; }
+
+    .scene {
+      padding-top: 300px;
+      margin-top: -280px;
+    }
+    .scene.opened {
+      padding-top: 10px;
+      margin-top: 0;
+    }
+
     .envelope-wrap { width: 300px; height: 205px; }
     .env-pocket::before {
       border-left-width: 150px;
@@ -361,9 +369,13 @@
     }
     .env-pocket::after { height: 102px; }
     .seal { top: 84px; width: 46px; height: 46px; font-size: 19px; }
-    .letter { width: 260px; padding: 26px 20px 22px; }
+    .letter {
+      width: 270px;
+      padding: 26px 20px 22px;
+      top: 36px;
+    }
     .envelope-wrap.opened .letter {
-      transform: translateX(-50%) translateY(-310px) scale(1);
+      transform: translateX(-50%) translateY(-285px) scale(1);
     }
     .letter h1 { font-size: 1.2em; }
     .letter p { font-size: 0.86em; line-height: 1.75; }
@@ -371,6 +383,7 @@
   }
 
   @media (max-width: 370px) {
+    .scene { padding-top: 280px; margin-top: -260px; }
     .envelope-wrap { width: 270px; height: 185px; }
     .env-pocket::before {
       border-left-width: 135px;
@@ -384,23 +397,23 @@
     }
     .env-pocket::after { height: 92px; }
     .seal { top: 76px; }
-    .letter { width: 240px; }
+    .letter { width: 245px; top: 32px; padding: 24px 18px 20px; }
     .envelope-wrap.opened .letter {
-      transform: translateX(-50%) translateY(-300px) scale(1);
+      transform: translateX(-50%) translateY(-265px) scale(1);
     }
+    .letter p { font-size: 0.82em; }
   }
 </style>
 </head>
 <body>
 
-<div class="scene">
+<div class="scene" id="scene">
   <div class="hint" id="hint">нажмите на конверт, чтобы открыть письмо</div>
 
   <div class="envelope-wrap" id="envelopeWrap">
     <div class="envelope-shadow"></div>
 
     <div class="envelope">
-      <!-- Письмо (внутри, выезжает вверх) -->
       <div class="letter" id="letter">
         <span class="corner-flower tl">🌿</span>
         <span class="corner-flower tr">🌸</span>
@@ -429,16 +442,13 @@
           <p>Я тебя очень-очень люблю! 💐</p>
 
           <div class="letter-sign">
-            Твоя Женечка!! <span class="heart">❤</span>
+            Твоя Женечка <span class="heart">❤</span>
           </div>
         </div>
       </div>
 
-      <!-- Карманы конверта -->
       <div class="env-pocket"></div>
-      <!-- Верхний клапан -->
       <div class="env-flap"></div>
-      <!-- Печать -->
       <div class="seal">✿</div>
     </div>
   </div>
@@ -455,6 +465,7 @@
   const hint = document.getElementById('hint');
   const foldBtn = document.getElementById('foldBtn');
   const bouquet = document.getElementById('finalBouquet');
+  const scene = document.getElementById('scene');
 
   let isOpen = false;
 
@@ -466,7 +477,19 @@
   function openLetter() {
     isOpen = true;
     wrap.classList.add('opened');
+    scene.classList.add('opened');
     hint.classList.add('hidden');
+
+    // авто-прокрутка вверх к письму после анимации
+    setTimeout(() => {
+      const letterEl = document.getElementById('letter');
+      const rect = letterEl.getBoundingClientRect();
+      // если письмо ушло выше видимой области — прокручиваем
+      if (rect.top < 10) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 700);
+
     setTimeout(() => {
       foldBtn.classList.add('visible');
       bouquet.classList.add('visible');
@@ -477,14 +500,15 @@
     e.stopPropagation();
     isOpen = false;
     wrap.classList.remove('opened');
+    scene.classList.remove('opened');
     foldBtn.classList.remove('visible');
     bouquet.classList.remove('visible');
     hint.classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
-  /* ===== Мягкий «бумажный» звук при открытии/закрытии ===== */
+  /* ===== звуки ===== */
   let audioCtx = null;
-
   function getCtx() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -495,19 +519,12 @@
     try {
       const ctx = getCtx();
       const now = ctx.currentTime;
-      const count = 6;
-      for (let i = 0; i < count; i++) {
+      for (let i = 0; i < 6; i++) {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(
-          900 + Math.random() * 1400,
-          now + i * 0.045
-        );
-        osc.frequency.exponentialRampToValueAtTime(
-          300 + Math.random() * 400,
-          now + i * 0.045 + 0.08
-        );
+        osc.frequency.setValueAtTime(900 + Math.random() * 1400, now + i * 0.045);
+        osc.frequency.exponentialRampToValueAtTime(300 + Math.random() * 400, now + i * 0.045 + 0.08);
         const vol = (isOpening ? 0.02 : 0.015) * (0.5 + Math.random());
         gain.gain.setValueAtTime(0, now + i * 0.045);
         gain.gain.linearRampToValueAtTime(vol, now + i * 0.045 + 0.01);
@@ -517,10 +534,9 @@
         osc.start(now + i * 0.045);
         osc.stop(now + i * 0.045 + 0.1);
       }
-    } catch (e) { /* тихо игнорируем */ }
+    } catch (e) {}
   }
 
-  /* Звук сургучной печати — глухой «тук» */
   function sealSnap() {
     try {
       const ctx = getCtx();
@@ -539,8 +555,6 @@
     } catch (e) {}
   }
 
-  // Привязка звуков к открытию/закрытию
-  const origOpen = openLetter;
   wrap.addEventListener('click', () => {
     if (!isOpen) {
       sealSnap();
@@ -548,9 +562,7 @@
     }
   });
 
-  foldBtn.addEventListener('click', () => {
-    paperSound(false);
-  });
+  foldBtn.addEventListener('click', () => paperSound(false));
 </script>
 
 </body>
