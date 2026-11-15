@@ -17,7 +17,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: 20px;
     position: relative;
     overflow-x: hidden;
   }
@@ -41,6 +41,49 @@
     z-index: 1;
   }
 
+  /* ===== ЗВЁЗДОЧКИ НА ФОНЕ ===== */
+  .star {
+    position: fixed;
+    color: #e8c5a0;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+    text-shadow: 0 0 6px rgba(232, 197, 160, 0.9),
+                 0 0 12px rgba(220, 180, 140, 0.6);
+    animation: twinkle ease-in-out infinite;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0; transform: scale(0.6) rotate(0deg); }
+    50% { opacity: 0.9; transform: scale(1.1) rotate(180deg); }
+  }
+
+  /* ===== ПАДАЮЩИЕ ОСЕННИЕ ЛИСТЬЯ ===== */
+  .leaf {
+    position: fixed;
+    top: -60px;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.85;
+    animation: leafFall linear infinite;
+    filter: drop-shadow(0 2px 3px rgba(90, 60, 40, 0.2));
+  }
+  @keyframes leafFall {
+    0% {
+      transform: translateY(-10vh) translateX(0) rotate(0deg);
+      opacity: 0;
+    }
+    10% { opacity: 0.9; }
+    50% {
+      transform: translateY(50vh) translateX(40px) rotate(180deg);
+    }
+    90% { opacity: 0.8; }
+    100% {
+      transform: translateY(110vh) translateX(-30px) rotate(360deg);
+      opacity: 0;
+    }
+  }
+
+  /* ===== Сцена ===== */
   .scene {
     position: relative;
     z-index: 10;
@@ -49,15 +92,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* запас сверху, чтобы письмо не упиралось в край */
-    padding-top: 320px;
-    margin-top: -300px;
-    transition: padding-top 0.9s cubic-bezier(0.4, 0, 0.2, 1),
-                margin-top 0.9s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .scene.opened {
-    padding-top: 20px;
-    margin-top: 0;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px 0;
   }
 
   .hint {
@@ -74,20 +111,30 @@
     0%, 100% { opacity: 0.55; }
     50% { opacity: 1; }
   }
-  .hint.hidden { opacity: 0; }
+  .hint.hidden { opacity: 0; pointer-events: none; }
 
-  /* ===== КОНВЕРТ ===== */
-  .envelope-wrap {
+  /* ===== СТАДИЯ (конверт + письмо) ===== */
+  .stage {
     position: relative;
     width: 340px;
     height: 230px;
-    cursor: pointer;
     perspective: 1200px;
-    transition: transform 0.5s ease;
-    flex-shrink: 0;
+  }
+
+  /* ===== КОНВЕРТ ===== */
+  .envelope-wrap {
+    position: absolute;
+    inset: 0;
+    cursor: pointer;
+    transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s ease;
   }
   .envelope-wrap:hover { transform: translateY(-4px); }
-  .envelope-wrap.opened { cursor: default; }
+  .envelope-wrap.opened {
+    cursor: default;
+    transform: translateY(120px) scale(0.9);
+    opacity: 0;
+    pointer-events: none;
+  }
 
   .envelope-shadow {
     position: absolute;
@@ -98,11 +145,6 @@
     height: 30px;
     background: radial-gradient(ellipse, rgba(90,70,60,0.28) 0%, transparent 70%);
     border-radius: 50%;
-    transition: all 0.8s ease;
-  }
-  .envelope-wrap.opened .envelope-shadow {
-    width: 240px;
-    opacity: 0.6;
   }
 
   .envelope {
@@ -113,7 +155,6 @@
     box-shadow:
       0 14px 40px rgba(110, 85, 65, 0.28),
       0 2px 0 rgba(255,255,255,0.7) inset;
-    overflow: visible;
   }
 
   .env-pocket {
@@ -156,7 +197,6 @@
   }
   .envelope-wrap.opened .env-flap {
     transform: rotateX(180deg);
-    z-index: 1;
   }
 
   .seal {
@@ -190,102 +230,97 @@
   }
   .envelope-wrap.opened .seal {
     opacity: 0;
-    transform: translateX(-50%) scale(0.4) rotate(-40deg) translateY(30px);
+    transform: translateX(-50%) scale(0.4) rotate(-40deg);
   }
 
   /* ===== ПИСЬМО ===== */
   .letter {
     position: absolute;
     left: 50%;
-    top: 40px;
-    transform: translateX(-50%) translateY(0) scale(0.92);
-    width: 300px;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0.85);
+    width: 320px;
     background: linear-gradient(175deg, #fffdf8 0%, #fdf6ec 100%);
-    border-radius: 4px;
+    border-radius: 6px;
     box-shadow:
-      0 2px 6px rgba(110, 85, 65, 0.15),
-      0 10px 30px rgba(110, 85, 65, 0.12);
+      0 4px 12px rgba(110, 85, 65, 0.18),
+      0 18px 44px rgba(110, 85, 65, 0.16);
     padding: 30px 26px 26px;
     z-index: 2;
     opacity: 0;
     pointer-events: none;
     transition:
-      transform 1s cubic-bezier(0.34, 1.2, 0.4, 1) 0.35s,
-      opacity 0.7s ease 0.35s,
-      z-index 0s 0.9s;
+      transform 1s cubic-bezier(0.34, 1.2, 0.4, 1) 0.25s,
+      opacity 0.8s ease 0.25s,
+      z-index 0s 0.6s;
     text-align: center;
   }
-  .envelope-wrap.opened .letter {
-    transform: translateX(-50%) translateY(-330px) scale(1);
+  .letter.opened {
+    transform: translate(-50%, -50%) scale(1);
     opacity: 1;
     pointer-events: auto;
     z-index: 20;
   }
 
-  .letter::before {
+  .letter-inner {
+    position: relative;
+    padding: 8px 4px;
+  }
+  .letter-inner::before {
     content: "";
     position: absolute;
-    inset: 9px;
+    inset: 0;
     border: 1px solid #e6d5bd;
-    border-radius: 2px;
-    pointer-events: none;
-  }
-  .letter::after {
-    content: "";
-    position: absolute;
-    inset: 13px;
-    border: 1px solid rgba(200, 180, 150, 0.4);
-    border-radius: 1px;
+    border-radius: 3px;
     pointer-events: none;
   }
 
-  .letter-content { position: relative; z-index: 2; }
-
-  .corner-flower {
+  .corner-ornament {
     position: absolute;
-    font-size: 26px;
-    opacity: 0.85;
+    width: 46px;
+    height: 46px;
     pointer-events: none;
+    opacity: 0.9;
   }
-  .corner-flower.tl { top: 2px; left: 4px; transform: rotate(-15deg); }
-  .corner-flower.tr { top: 2px; right: 4px; transform: rotate(15deg); }
-  .corner-flower.bl { bottom: 2px; left: 4px; transform: rotate(15deg); }
-  .corner-flower.br { bottom: 2px; right: 4px; transform: rotate(-15deg); }
+  .corner-ornament.tl { top: -2px; left: -2px; }
+  .corner-ornament.tr { top: -2px; right: -2px; transform: scaleX(-1); }
+  .corner-ornament.bl { bottom: -2px; left: -2px; transform: scaleY(-1); }
+  .corner-ornament.br { bottom: -2px; right: -2px; transform: scale(-1, -1); }
 
   .letter h1 {
-    font-size: 1.35em;
+    font-size: 1.4em;
     color: #8a5a4a;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
     font-weight: normal;
   }
   .letter .subtitle {
-    font-size: 0.85em;
+    font-size: 0.82em;
     color: #b09a82;
     font-style: italic;
     letter-spacing: 2px;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
   }
   .letter .ornament {
     color: #c9a882;
-    font-size: 14px;
+    font-size: 12px;
     letter-spacing: 6px;
-    margin: 8px 0 16px;
+    margin: 6px 0 14px;
   }
   .letter p {
-    font-size: 0.92em;
-    line-height: 1.85;
+    font-size: 0.9em;
+    line-height: 1.8;
     color: #5a4a3e;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     text-align: center;
   }
   .letter .letter-sign {
     font-style: italic;
     color: #a56a5a;
-    font-size: 1em;
-    margin-top: 16px;
+    font-size: 0.98em;
+    margin-top: 14px;
     text-align: right;
-    padding-right: 6px;
+    padding-right: 4px;
   }
   .letter .heart {
     display: inline-block;
@@ -310,11 +345,12 @@
     cursor: pointer;
     opacity: 0;
     pointer-events: none;
-    transition: all 0.5s ease 1.2s;
+    transition: all 0.5s ease;
   }
   .fold-btn.visible {
     opacity: 1;
     pointer-events: auto;
+    transition: all 0.5s ease 0.8s;
   }
   .fold-btn:hover {
     background: #c9a882;
@@ -328,10 +364,14 @@
     justify-content: center;
     opacity: 0;
     transform: translateY(10px);
-    transition: all 0.8s ease 1.4s;
+    transition: all 0.8s ease;
     font-size: 22px;
   }
-  .final-bouquet.visible { opacity: 1; transform: translateY(0); }
+  .final-bouquet.visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 0.8s ease 1s;
+  }
   .final-bouquet span {
     display: inline-block;
     animation: gentleSway 3.5s ease-in-out infinite;
@@ -345,18 +385,18 @@
 
   /* ===== МОБИЛЬНАЯ ВЕРСИЯ ===== */
   @media (max-width: 520px) {
-    body { padding: 16px; align-items: flex-start; padding-top: 30px; }
+    body { padding: 12px; }
 
     .scene {
-      padding-top: 300px;
-      margin-top: -280px;
-    }
-    .scene.opened {
-      padding-top: 10px;
-      margin-top: 0;
+      min-height: 100vh;
+      justify-content: center;
+      padding: 10px 0;
     }
 
-    .envelope-wrap { width: 300px; height: 205px; }
+    .stage {
+      width: 300px;
+      height: 205px;
+    }
     .env-pocket::before {
       border-left-width: 150px;
       border-right-width: 150px;
@@ -369,22 +409,19 @@
     }
     .env-pocket::after { height: 102px; }
     .seal { top: 84px; width: 46px; height: 46px; font-size: 19px; }
+
     .letter {
-      width: 270px;
+      width: 290px;
       padding: 26px 20px 22px;
-      top: 36px;
     }
-    .envelope-wrap.opened .letter {
-      transform: translateX(-50%) translateY(-285px) scale(1);
-    }
-    .letter h1 { font-size: 1.2em; }
-    .letter p { font-size: 0.86em; line-height: 1.75; }
-    .corner-flower { font-size: 22px; }
+    .letter h1 { font-size: 1.25em; }
+    .letter p { font-size: 0.86em; line-height: 1.7; }
+    .corner-ornament { width: 38px; height: 38px; }
+    .hint { font-size: 0.85em; margin-bottom: 18px; }
   }
 
   @media (max-width: 370px) {
-    .scene { padding-top: 280px; margin-top: -260px; }
-    .envelope-wrap { width: 270px; height: 185px; }
+    .stage { width: 270px; height: 185px; }
     .env-pocket::before {
       border-left-width: 135px;
       border-right-width: 135px;
@@ -397,59 +434,82 @@
     }
     .env-pocket::after { height: 92px; }
     .seal { top: 76px; }
-    .letter { width: 245px; top: 32px; padding: 24px 18px 20px; }
-    .envelope-wrap.opened .letter {
-      transform: translateX(-50%) translateY(-265px) scale(1);
-    }
+
+    .letter { width: 260px; padding: 24px 16px 20px; }
     .letter p { font-size: 0.82em; }
+    .letter h1 { font-size: 1.15em; }
+    .corner-ornament { width: 32px; height: 32px; }
   }
 </style>
 </head>
 <body>
 
-<div class="scene" id="scene">
+<div class="scene">
   <div class="hint" id="hint">нажмите на конверт, чтобы открыть письмо</div>
 
-  <div class="envelope-wrap" id="envelopeWrap">
-    <div class="envelope-shadow"></div>
+  <div class="stage">
+    <!-- ПИСЬМО -->
+    <div class="letter" id="letter">
+      <div class="letter-inner">
+        <svg class="corner-ornament tl" viewBox="0 0 46 46" fill="none">
+          <path d="M2 44 Q2 2 44 2" stroke="#c9a882" stroke-width="1" fill="none"/>
+          <circle cx="8" cy="8" r="3.5" fill="#e8c5c5"/>
+          <circle cx="8" cy="8" r="1.5" fill="#c85a5a"/>
+          <path d="M14 2 Q14 8 8 8" stroke="#b09a82" stroke-width="0.8" fill="none"/>
+        </svg>
+        <svg class="corner-ornament tr" viewBox="0 0 46 46" fill="none">
+          <path d="M2 44 Q2 2 44 2" stroke="#c9a882" stroke-width="1" fill="none"/>
+          <circle cx="8" cy="8" r="3.5" fill="#e8c5c5"/>
+          <circle cx="8" cy="8" r="1.5" fill="#c85a5a"/>
+          <path d="M14 2 Q14 8 8 8" stroke="#b09a82" stroke-width="0.8" fill="none"/>
+        </svg>
+        <svg class="corner-ornament bl" viewBox="0 0 46 46" fill="none">
+          <path d="M2 44 Q2 2 44 2" stroke="#c9a882" stroke-width="1" fill="none"/>
+          <circle cx="8" cy="8" r="3.5" fill="#e8c5c5"/>
+          <circle cx="8" cy="8" r="1.5" fill="#c85a5a"/>
+          <path d="M14 2 Q14 8 8 8" stroke="#b09a82" stroke-width="0.8" fill="none"/>
+        </svg>
+        <svg class="corner-ornament br" viewBox="0 0 46 46" fill="none">
+          <path d="M2 44 Q2 2 44 2" stroke="#c9a882" stroke-width="1" fill="none"/>
+          <circle cx="8" cy="8" r="3.5" fill="#e8c5c5"/>
+          <circle cx="8" cy="8" r="1.5" fill="#c85a5a"/>
+          <path d="M14 2 Q14 8 8 8" stroke="#b09a82" stroke-width="0.8" fill="none"/>
+        </svg>
 
-    <div class="envelope">
-      <div class="letter" id="letter">
-        <span class="corner-flower tl">🌿</span>
-        <span class="corner-flower tr">🌸</span>
-        <span class="corner-flower bl">🌸</span>
-        <span class="corner-flower br">🌿</span>
+        <h1>Дорогой маме</h1>
+        <div class="subtitle">с любовью и теплом</div>
+        <div class="ornament">✦ ❀ ✦</div>
 
-        <div class="letter-content">
-          <h1>Дорогой маме</h1>
-          <div class="subtitle">с любовью и теплом</div>
-          <div class="ornament">✦ ❀ ✦</div>
+        <p>
+          Мамочка, любимая!<br>
+          В этот день мне хочется сказать тебе самое главное:
+          спасибо за твою доброту, за тёплые руки
+          и за то, что ты всегда рядом — даже когда я далеко.
+        </p>
 
-          <p>
-            Мамочка, любимая!<br>
-            В этот день мне хочется сказать тебе самое главное:
-            спасибо за твою доброту, за тёплые руки
-            и за то, что ты всегда рядом — даже когда я далеко.
-          </p>
+        <p>
+          Пусть этот год принесёт тебе столько же тепла и света,
+          сколько ты даришь мне каждый день. Будь счастлива,
+          здорова и улыбайся как можно чаще — твоя улыбка
+          делает мир добрее.
+        </p>
 
-          <p>
-            Пусть этот год принесёт тебе столько же тепла и света,
-            сколько ты даришь мне каждый день. Будь счастлива,
-            здорова и улыбайся как можно чаще — твоя улыбка
-            делает мир добрее.
-          </p>
+        <p>Я тебя очень-очень люблю! 💐</p>
 
-          <p>Я тебя очень-очень люблю! 💐</p>
-
-          <div class="letter-sign">
-            Твоя Женечка <span class="heart">❤</span>
-          </div>
+        <div class="letter-sign">
+          Твоя [Имя] <span class="heart">❤</span>
         </div>
       </div>
+    </div>
 
-      <div class="env-pocket"></div>
-      <div class="env-flap"></div>
-      <div class="seal">✿</div>
+    <!-- КОНВЕРТ -->
+    <div class="envelope-wrap" id="envelopeWrap">
+      <div class="envelope-shadow"></div>
+      <div class="envelope">
+        <div class="env-pocket"></div>
+        <div class="env-flap"></div>
+        <div class="seal">✿</div>
+      </div>
     </div>
   </div>
 
@@ -461,11 +521,64 @@
 </div>
 
 <script>
+  /* ========== МЕРЦАЮЩИЕ ЗВЁЗДОЧКИ ========== */
+  const starSymbols = ['✦', '✧', '★', '⋆', '✩', '✫', '·'];
+  const starColors = ['#e8c5a0', '#f0d5b0', '#d4b896', '#f5e0c8', '#e0c8a8'];
+
+  function createStar() {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.textContent = starSymbols[Math.floor(Math.random() * starSymbols.length)];
+    s.style.left = Math.random() * 100 + 'vw';
+    s.style.top = Math.random() * 100 + 'vh';
+    s.style.fontSize = (Math.random() * 14 + 8) + 'px';
+    s.style.color = starColors[Math.floor(Math.random() * starColors.length)];
+    const dur = (Math.random() * 3 + 2) + 's';
+    s.style.animationDuration = dur;
+    s.style.animationDelay = (Math.random() * 4) + 's';
+    document.body.appendChild(s);
+  }
+
+  // создаём 35 звёздочек
+  for (let i = 0; i < 35; i++) createStar();
+
+  // иногда добавляем новые, чтобы фон «жил»
+  setInterval(() => {
+    if (document.querySelectorAll('.star').length < 45) createStar();
+  }, 2500);
+
+  /* ========== ПАДАЮЩИЕ ОСЕННИЕ ЛИСТЬЯ ========== */
+  const leafSymbols = ['🍂', '🍁', '🍃', '🌿'];
+  const leafColors = ['#c97a4a', '#d4904a', '#a86a3a', '#b8824a', '#9e7a4a'];
+
+  function createLeaf() {
+    const l = document.createElement('div');
+    l.className = 'leaf';
+    l.textContent = leafSymbols[Math.floor(Math.random() * leafSymbols.length)];
+    l.style.left = Math.random() * 100 + 'vw';
+    l.style.fontSize = (Math.random() * 18 + 16) + 'px';
+    l.style.animationDuration = (Math.random() * 6 + 7) + 's';
+    l.style.animationDelay = (Math.random() * 2) + 's';
+    l.style.opacity = (Math.random() * 0.3 + 0.6);
+    l.style.filter = `drop-shadow(0 2px 3px rgba(90,60,40,0.25)) hue-rotate(${Math.random() * 20 - 10}deg)`;
+    document.body.appendChild(l);
+    setTimeout(() => l.remove(), 16000);
+  }
+
+  // запускаем листопад
+  setInterval(createLeaf, 900);
+
+  // несколько листьев сразу при загрузке
+  for (let i = 0; i < 5; i++) {
+    setTimeout(createLeaf, i * 400);
+  }
+
+  /* ========== ЛОГИКА ОТКРЫТКИ ========== */
   const wrap = document.getElementById('envelopeWrap');
   const hint = document.getElementById('hint');
   const foldBtn = document.getElementById('foldBtn');
   const bouquet = document.getElementById('finalBouquet');
-  const scene = document.getElementById('scene');
+  const letter = document.getElementById('letter');
 
   let isOpen = false;
 
@@ -477,37 +590,26 @@
   function openLetter() {
     isOpen = true;
     wrap.classList.add('opened');
-    scene.classList.add('opened');
+    letter.classList.add('opened');
     hint.classList.add('hidden');
-
-    // авто-прокрутка вверх к письму после анимации
-    setTimeout(() => {
-      const letterEl = document.getElementById('letter');
-      const rect = letterEl.getBoundingClientRect();
-      // если письмо ушло выше видимой области — прокручиваем
-      if (rect.top < 10) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }, 700);
 
     setTimeout(() => {
       foldBtn.classList.add('visible');
       bouquet.classList.add('visible');
-    }, 1300);
+    }, 900);
   }
 
   foldBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     isOpen = false;
     wrap.classList.remove('opened');
-    scene.classList.remove('opened');
+    letter.classList.remove('opened');
     foldBtn.classList.remove('visible');
     bouquet.classList.remove('visible');
     hint.classList.remove('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
-  /* ===== звуки ===== */
+  /* ========== ЗВУКИ ========== */
   let audioCtx = null;
   function getCtx() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -558,7 +660,7 @@
   wrap.addEventListener('click', () => {
     if (!isOpen) {
       sealSnap();
-      setTimeout(() => paperSound(true), 400);
+      setTimeout(() => paperSound(true), 300);
     }
   });
 
